@@ -2,6 +2,10 @@
 	"servers": {
 		"svelte": {
 			"url": "https://mcp.svelte.dev/mcp"
-		}
+		},
+		"daisyUI": {
+     		"type": "sse",
+     		"url": "https://gitmcp.io/saadeghi/daisyui"
+   		}
 	}
 }

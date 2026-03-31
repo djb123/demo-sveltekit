@@ -42,5 +42,11 @@
 		"vite": "^7.3.1",
 		"vitest": "^4.1.0",
 		"vitest-browser-svelte": "^2.0.2"
+	},
+	"dependencies": {
+		"@tanstack/svelte-query": "^6.1.10",
+		"@thatapicompany/thecatapi": "^1.0.2",
+		"daisyui": "^5.5.19",
+		"dexie": "^4.4.1"
 	}
 }
