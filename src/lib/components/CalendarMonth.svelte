@@ -10,7 +10,7 @@
 		forPrint?: boolean;
 	}
 
-	let { year, month, photo, events, forPrint = false }: Props = $props();
+	let { year, month, photo, events, forPrint: _forPrint = false }: Props = $props();
 
 	const grid = $derived(getMonthGrid(year, month));
 	const photoSrc = $derived(photo?.imageDataUrl ?? photo?.imageUrl ?? '');
@@ -49,7 +49,7 @@
 
 		<!-- Day-of-week headers -->
 		<div class="grid shrink-0 grid-cols-7">
-			{#each DAY_NAMES as day}
+			{#each DAY_NAMES as day (day)}
 				<div class="py-0.5 text-center text-[9px] font-semibold text-base-content/50">{day}</div>
 			{/each}
 		</div>
@@ -66,7 +66,7 @@
 						<span class="block text-[9px] leading-none font-semibold">{cell}</span>
 						{#if eventsByDay[cell]}
 							<div class="mt-px flex flex-col gap-px">
-								{#each eventsByDay[cell] as ev}
+								{#each eventsByDay[cell] as ev, evI (ev.id ?? evI)}
 									<span
 										class="block truncate rounded px-0.5 text-[7px] leading-tight"
 										style="background-color: {ev.color ?? '#3b82f6'}; color: {ev.textColor ??

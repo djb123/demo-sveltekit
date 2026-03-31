@@ -5,6 +5,7 @@
 	import { MONTH_NAMES } from '$lib/utils/calendar.js';
 	import type { FavoriteCat, CalendarEvent } from '$lib/types.js';
 	import CalendarMonth from '$lib/components/CalendarMonth.svelte';
+	import { resolve } from '$app/paths';
 
 	const calendarId = $derived(Number(page.url.searchParams.get('id') ?? '0'));
 
@@ -88,7 +89,7 @@
 		{/if}
 	</div>
 	<div class="flex gap-2">
-		<a href="/calendar" class="btn btn-ghost btn-sm">← Back</a>
+		<a href={resolve('/calendar')} class="btn btn-ghost btn-sm">← Back</a>
 		<button class="btn btn-sm btn-primary" onclick={print}>🖨 Print</button>
 	</div>
 </div>

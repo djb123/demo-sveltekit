@@ -6,6 +6,7 @@
 	import PhotoPickerModal from '$lib/components/PhotoPickerModal.svelte';
 	import EventForm from '$lib/components/EventForm.svelte';
 	import CalendarMonth from '$lib/components/CalendarMonth.svelte';
+	import { resolve } from '$app/paths';
 
 	// ── Calendar list ─────────────────────────────────────────────────────────
 	const allCalendars = useLiveQuery(() => db.calendars.orderBy('createdAt').reverse().toArray());
@@ -211,7 +212,11 @@
 				<button class="btn btn-ghost btn-sm" onclick={() => (showPreview = !showPreview)}>
 					{showPreview ? 'Hide preview' : 'Show preview'}
 				</button>
-				<a href="/calendar/print?id={cal.id}" class="btn btn-sm btn-primary" target="_blank">
+				<a
+					href="{resolve('/calendar/print')}?id={cal.id}"
+					class="btn btn-sm btn-primary"
+					target="_blank"
+				>
 					Preview & Print
 				</a>
 			</div>

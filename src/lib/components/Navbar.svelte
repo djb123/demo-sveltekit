@@ -1,23 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 
 	const links = [
 		{ href: '/browse', label: 'Browse' },
 		{ href: '/favorites', label: 'Favorites' },
 		{ href: '/upload', label: 'Upload' },
 		{ href: '/calendar', label: 'Calendar' }
-	];
+	] as const;
 </script>
 
 <div class="navbar sticky top-0 z-50 bg-base-200 shadow-sm">
 	<div class="navbar-start">
-		<a href="/browse" class="btn text-xl font-bold btn-ghost">🐱 Cat Calendar</a>
+		<a href={resolve('/browse')} class="btn text-xl font-bold btn-ghost">🐱 Cat Calendar</a>
 	</div>
 	<div class="navbar-center hidden md:flex">
 		<ul class="menu menu-horizontal gap-1 px-1">
-			{#each links as link}
+			{#each links as link (link.href)}
 				<li>
-					<a href={link.href} class:active={page.url.pathname.startsWith(link.href)}>{link.label}</a
+					<a href={resolve(link.href)} class:active={page.url.pathname.startsWith(link.href)}
+						>{link.label}</a
 					>
 				</li>
 			{/each}
@@ -42,9 +44,9 @@
 				</svg>
 			</div>
 			<ul class="dropdown-content menu z-10 mt-3 w-52 menu-sm rounded-box bg-base-100 p-2 shadow">
-				{#each links as link}
+				{#each links as link (link.href)}
 					<li>
-						<a href={link.href} class:active={page.url.pathname.startsWith(link.href)}
+						<a href={resolve(link.href)} class:active={page.url.pathname.startsWith(link.href)}
 							>{link.label}</a
 						>
 					</li>

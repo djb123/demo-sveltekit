@@ -2,6 +2,7 @@
 	import { db } from '$lib/db.js';
 	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
 	import FavoriteCard from '$lib/components/FavoriteCard.svelte';
+	import { resolve } from '$app/paths';
 
 	let activeTab = $state<'api' | 'uploads'>('api');
 
@@ -43,12 +44,12 @@
 			{#if activeTab === 'api'}
 				<span>
 					No favorited cats yet.
-					<a href="/browse" class="link">Browse cats</a> and click ❤ to save them here.
+					<a href={resolve('/browse')} class="link">Browse cats</a> and click ❤ to save them here.
 				</span>
 			{:else}
 				<span>
 					No uploads yet.
-					<a href="/upload" class="link">Upload your cats</a> to get started.
+					<a href={resolve('/upload')} class="link">Upload your cats</a> to get started.
 				</span>
 			{/if}
 		</div>

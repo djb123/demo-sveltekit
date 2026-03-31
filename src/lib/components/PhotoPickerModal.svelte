@@ -2,6 +2,7 @@
 	import type { FavoriteCat } from '$lib/types.js';
 	import { db } from '$lib/db.js';
 	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		open: boolean;
@@ -60,8 +61,8 @@
 		{#if (allFavorites.value ?? []).length === 0}
 			<div class="alert">
 				<span>
-					No favorites yet. <a href="/browse" class="link">Browse</a> or
-					<a href="/upload" class="link">upload</a> cat photos first.
+					No favorites yet. <a href={resolve('/browse')} class="link">Browse</a> or
+					<a href={resolve('/upload')} class="link">upload</a> cat photos first.
 				</span>
 			</div>
 		{:else if filtered.length === 0}
