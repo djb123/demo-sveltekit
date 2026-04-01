@@ -12,7 +12,7 @@
 
 <div class="navbar sticky top-0 z-50 bg-base-200 shadow-sm">
 	<div class="navbar-start">
-		<a href={resolve('/browse')} class="fancy-font btn text-xl font-bold btn-ghost"
+		<a href={resolve('/')} class="fancy-font btn text-xl font-bold btn-ghost"
 			>🐱 Cat Calendar Creator</a
 		>
 	</div>
