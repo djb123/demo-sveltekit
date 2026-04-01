@@ -4,15 +4,17 @@
 
 	const links = [
 		{ href: '/browse', label: 'Browse' },
-		{ href: '/favorites', label: 'Favorites' },
 		{ href: '/upload', label: 'Upload' },
+		{ href: '/favorites', label: 'Favorites' },
 		{ href: '/calendar', label: 'Calendar' }
 	] as const;
 </script>
 
 <div class="navbar sticky top-0 z-50 bg-base-200 shadow-sm">
 	<div class="navbar-start">
-		<a href={resolve('/browse')} class="btn text-xl font-bold btn-ghost">🐱 Cat Calendar</a>
+		<a href={resolve('/browse')} class="fancy-font btn text-xl font-bold btn-ghost"
+			>🐱 Cat Calendar Creator</a
+		>
 	</div>
 	<div class="navbar-center hidden md:flex">
 		<ul class="menu menu-horizontal gap-1 px-1">
