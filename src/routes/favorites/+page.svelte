@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 	import FavoriteCard from '$lib/components/FavoriteCard.svelte';
 	import { resolve } from '$app/paths';
 
 	let activeTab = $state<'api' | 'uploads'>('api');
 
-	const allFavorites = useLiveQuery(() => db.favorites.orderBy('addedAt').reverse().toArray());
+	const allFavorites = $derived(
+		liveQuery(() => db.favorites.orderBy('addedAt').reverse().toArray())
+	);
 
-	const apiFavorites = $derived(allFavorites.value?.filter((f) => !f.isUploaded) ?? []);
-	const uploadedFavorites = $derived(allFavorites.value?.filter((f) => f.isUploaded) ?? []);
+	const apiFavorites = $derived($allFavorites?.filter((f) => !f.isUploaded) ?? []);
+	const uploadedFavorites = $derived($allFavorites?.filter((f) => f.isUploaded) ?? []);
 	const displayed = $derived(activeTab === 'api' ? apiFavorites : uploadedFavorites);
 </script>
 
@@ -33,7 +35,7 @@
 		</button>
 	</div>
 
-	{#if allFavorites.value === undefined}
+	{#if $allFavorites === undefined}
 		<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 			{#each Array(8) as _, i (i)}
 				<div class="aspect-square skeleton rounded-xl"></div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 	import { MONTH_NAMES } from '$lib/utils/calendar.js';
 	import type { FavoriteCat, CalendarEvent } from '$lib/types.js';
 	import CalendarMonth from '$lib/components/CalendarMonth.svelte';
@@ -9,18 +9,22 @@
 
 	const calendarId = $derived(Number(page.url.searchParams.get('id') ?? '0'));
 
-	const calendarQuery = useLiveQuery(() => (calendarId ? db.calendars.get(calendarId) : undefined));
+	const calendarQuery = $derived(
+		liveQuery(() => (calendarId ? db.calendars.get(calendarId) : undefined))
+	);
 
-	const eventsQuery = useLiveQuery<CalendarEvent[]>(() =>
-		calendarId
-			? db.calendarEvents.where('calendarId').equals(calendarId).toArray()
-			: Promise.resolve([])
+	const eventsQuery = $derived(
+		liveQuery<CalendarEvent[]>(() =>
+			calendarId
+				? db.calendarEvents.where('calendarId').equals(calendarId).toArray()
+				: Promise.resolve([])
+		)
 	);
 
 	let slotPhotos = $state<(FavoriteCat | null | undefined)[]>(Array(12).fill(undefined));
 
 	$effect(() => {
-		const photoIds = calendarQuery.value?.photoIds;
+		const photoIds = $calendarQuery?.photoIds;
 		if (!photoIds) {
 			slotPhotos = Array(12).fill(undefined);
 			return;
@@ -37,9 +41,9 @@
 	});
 
 	function monthEvents(month: number): CalendarEvent[] {
-		return (eventsQuery.value ?? []).filter((e) => {
+		return ($eventsQuery ?? []).filter((e) => {
 			const d = new Date(e.date + 'T12:00:00');
-			return d.getFullYear() === calendarQuery.value?.year && d.getMonth() === month;
+			return d.getFullYear() === $calendarQuery?.year && d.getMonth() === month;
 		});
 	}
 
@@ -49,7 +53,7 @@
 </script>
 
 <svelte:head>
-	<title>{calendarQuery.value?.name ?? 'Calendar'} {calendarQuery.value?.year ?? ''}</title>
+	<title>{$calendarQuery?.name ?? 'Calendar'} {$calendarQuery?.year ?? ''}</title>
 	<style>
 		@media print {
 			.no-print {
@@ -77,10 +81,10 @@
 <!-- Print toolbar -->
 <div class="no-print mb-6 flex items-center justify-between rounded-xl bg-base-200 p-4">
 	<div>
-		{#if calendarQuery.value}
-			<h1 class="text-xl font-bold">{calendarQuery.value.name} — {calendarQuery.value.year}</h1>
+		{#if $calendarQuery}
+			<h1 class="text-xl font-bold">{$calendarQuery.name} — {$calendarQuery.year}</h1>
 			<p class="text-sm text-base-content/60">
-				{(calendarQuery.value.photoIds ?? []).filter((id) => id != null).length}/12 photos assigned
+				{($calendarQuery.photoIds ?? []).filter((id) => id != null).length}/12 photos assigned
 			</p>
 		{:else if calendarId === 0}
 			<p class="text-error">No calendar ID provided in URL.</p>
@@ -98,19 +102,19 @@
 	<div class="no-print alert alert-error">
 		<span>No calendar selected. Go back and choose a calendar to print.</span>
 	</div>
-{:else if calendarQuery.value === undefined}
+{:else if $calendarQuery === undefined}
 	<!-- Loading -->
 	<div class="no-print grid grid-cols-1 gap-0">
 		{#each Array(12) as _, i (i)}
 			<div class="mb-4 h-[297mm] w-full skeleton"></div>
 		{/each}
 	</div>
-{:else if calendarQuery.value === null}
+{:else if $calendarQuery === null}
 	<div class="no-print alert alert-error">
 		<span>Calendar not found.</span>
 	</div>
 {:else}
-	{@const cal = calendarQuery.value}
+	{@const cal = $calendarQuery}
 	{#each MONTH_NAMES as _, i (i)}
 		<div
 			class="month-page"

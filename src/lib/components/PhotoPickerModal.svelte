@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FavoriteCat } from '$lib/types.js';
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 	import { resolve } from '$app/paths';
 
 	interface Props {
@@ -16,10 +16,12 @@
 	let dialog = $state<HTMLDialogElement | undefined>();
 	let searchTerm = $state('');
 
-	const allFavorites = useLiveQuery(() => db.favorites.orderBy('addedAt').reverse().toArray());
+	const allFavorites = $derived(
+		liveQuery(() => db.favorites.orderBy('addedAt').reverse().toArray())
+	);
 
 	const filtered = $derived(
-		(allFavorites.value ?? []).filter((cat) => {
+		($allFavorites ?? []).filter((cat) => {
 			if (!searchTerm.trim()) return true;
 			return cat.name?.toLowerCase().includes(searchTerm.toLowerCase());
 		})
@@ -58,7 +60,7 @@
 			bind:value={searchTerm}
 		/>
 
-		{#if (allFavorites.value ?? []).length === 0}
+		{#if ($allFavorites ?? []).length === 0}
 			<div class="alert">
 				<span>
 					No favorites yet. <a href={resolve('/browse')} class="link">Browse</a> or

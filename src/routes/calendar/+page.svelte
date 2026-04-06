@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 	import { getDefaultYear, MONTH_NAMES } from '$lib/utils/calendar.js';
 	import type { CalendarRecord, CalendarEvent, FavoriteCat } from '$lib/types.js';
 	import PhotoPickerModal from '$lib/components/PhotoPickerModal.svelte';
@@ -9,7 +9,9 @@
 	import { resolve } from '$app/paths';
 
 	// ── Calendar list ─────────────────────────────────────────────────────────
-	const allCalendars = useLiveQuery(() => db.calendars.orderBy('createdAt').reverse().toArray());
+	const allCalendars = $derived(
+		liveQuery(() => db.calendars.orderBy('createdAt').reverse().toArray())
+	);
 
 	// ── New calendar form ─────────────────────────────────────────────────────
 	let newName = $state('');
@@ -43,21 +45,23 @@
 	// ── Active calendar ───────────────────────────────────────────────────────
 	let activeCalendarId = $state<number | null>(null);
 
-	const activeCalendar = useLiveQuery(() =>
-		activeCalendarId != null ? db.calendars.get(activeCalendarId) : undefined
+	const activeCalendar = $derived(
+		activeCalendarId != null ? liveQuery(() => db.calendars.get(activeCalendarId!)) : undefined
 	);
 
-	const activeEvents = useLiveQuery<CalendarEvent[]>(() =>
-		activeCalendarId != null
-			? db.calendarEvents.where('calendarId').equals(activeCalendarId).toArray()
-			: Promise.resolve([])
+	const activeEvents = $derived(
+		liveQuery<CalendarEvent[]>(() =>
+			activeCalendarId != null
+				? db.calendarEvents.where('calendarId').equals(activeCalendarId).toArray()
+				: Promise.resolve([])
+		)
 	);
 
 	// Load photos for the 12 slots
 	let slotPhotos = $state<(FavoriteCat | null | undefined)[]>(Array(12).fill(undefined));
 
 	$effect(() => {
-		const photoIds = activeCalendar.value?.photoIds;
+		const photoIds = $activeCalendar?.photoIds;
 		if (!photoIds) {
 			slotPhotos = Array(12).fill(undefined);
 			return;
@@ -83,15 +87,15 @@
 	}
 
 	async function handlePhotoPick(cat: FavoriteCat) {
-		if (activeCalendarId == null || pickingMonthIndex == null || !activeCalendar.value) return;
-		const photoIds = [...(activeCalendar.value.photoIds ?? Array(12).fill(null))];
+		if (activeCalendarId == null || pickingMonthIndex == null || !$activeCalendar) return;
+		const photoIds = [...($activeCalendar.photoIds ?? Array(12).fill(null))];
 		photoIds[pickingMonthIndex] = cat.id ?? null;
 		await db.calendars.update(activeCalendarId, { photoIds });
 	}
 
 	async function clearSlot(monthIndex: number) {
-		if (activeCalendarId == null || !activeCalendar.value) return;
-		const photoIds = [...(activeCalendar.value.photoIds ?? Array(12).fill(null))];
+		if (activeCalendarId == null || !$activeCalendar) return;
+		const photoIds = [...($activeCalendar.photoIds ?? Array(12).fill(null))];
 		photoIds[monthIndex] = null;
 		await db.calendars.update(activeCalendarId, { photoIds });
 	}
@@ -110,9 +114,7 @@
 	// ── Preview calendar shown below builder ──────────────────────────────────
 	let showPreview = $state(false);
 
-	const filledSlots = $derived(
-		(activeCalendar.value?.photoIds ?? []).filter((id) => id != null).length
-	);
+	const filledSlots = $derived(($activeCalendar?.photoIds ?? []).filter((id) => id != null).length);
 </script>
 
 <div class="space-y-6">
@@ -161,17 +163,17 @@
 	</div>
 
 	<!-- Calendar list -->
-	{#if allCalendars.value === undefined}
+	{#if $allCalendars === undefined}
 		<div class="flex gap-3">
 			{#each Array(3) as _, i (i)}
 				<div class="h-20 w-48 skeleton rounded-xl"></div>
 			{/each}
 		</div>
-	{:else if allCalendars.value.length === 0}
+	{:else if $allCalendars.length === 0}
 		<div class="alert"><span>No calendars yet. Create one above to get started.</span></div>
 	{:else}
 		<div class="flex flex-wrap gap-3">
-			{#each allCalendars.value as cal (cal.id)}
+			{#each $allCalendars as cal (cal.id)}
 				<div
 					class="card cursor-pointer border-2 bg-base-100 shadow transition-colors
 						{activeCalendarId === cal.id ? 'border-primary' : 'border-transparent hover:border-base-300'}"
@@ -202,8 +204,8 @@
 	{/if}
 
 	<!-- Calendar editor -->
-	{#if activeCalendar.value}
-		{@const cal = activeCalendar.value}
+	{#if $activeCalendar}
+		{@const cal = $activeCalendar}
 		<div class="divider"></div>
 
 		<div class="flex flex-wrap items-center justify-between gap-2">
@@ -283,7 +285,7 @@
 			onDone={() => (editingEvent = null)}
 		/>
 
-		{#if (activeEvents.value ?? []).length > 0}
+		{#if ($activeEvents ?? []).length > 0}
 			<div class="overflow-x-auto">
 				<table class="table table-sm">
 					<thead>
@@ -295,7 +297,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each sortedEvents(activeEvents.value ?? []) as ev (ev.id)}
+						{#each sortedEvents($activeEvents ?? []) as ev (ev.id)}
 							<tr>
 								<td class="whitespace-nowrap">{ev.date}</td>
 								<td>
@@ -335,7 +337,7 @@
 							year={cal.year}
 							month={i}
 							photo={slotPhotos[i] ?? null}
-							events={(activeEvents.value ?? []).filter((e) => {
+							events={($activeEvents ?? []).filter((e) => {
 								const d = new Date(e.date + 'T12:00:00');
 								return d.getMonth() === i && d.getFullYear() === cal.year;
 							})}

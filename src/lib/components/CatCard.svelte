@@ -1,16 +1,18 @@
 <script lang="ts">
 	import type { CatImage } from '$lib/types.js';
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 
 	let { image }: { image: CatImage } = $props();
 
-	const favQuery = useLiveQuery(() => db.favorites.where('catApiId').equals(image.id).first());
-	const isFavorited = $derived(!!favQuery.value);
+	const favQuery = $derived(
+		liveQuery(() => db.favorites.where('catApiId').equals(image.id).first())
+	);
+	const isFavorited = $derived(!!$favQuery);
 
 	async function toggleFavorite() {
-		if (favQuery.value?.id != null) {
-			await db.favorites.delete(favQuery.value.id);
+		if ($favQuery?.id != null) {
+			await db.favorites.delete($favQuery.id);
 		} else {
 			await db.favorites.add({
 				catApiId: image.id,

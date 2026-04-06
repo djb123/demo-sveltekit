@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import logopic from '$lib/assets/CatCalendarCreator_h.png';
 
 	const links = [
 		{ href: '/browse', label: 'Browse' },
@@ -10,11 +11,11 @@
 	] as const;
 </script>
 
-<div class="navbar sticky top-0 z-50 bg-base-200 shadow-sm">
+<div class="no-print navbar sticky top-0 z-50 bg-base-200 shadow-sm">
 	<div class="navbar-start">
-		<a href={resolve('/')} class="fancy-font btn text-xl font-bold btn-ghost"
-			>🐱 Cat Calendar Creator</a
-		>
+		<a href={resolve('/')} class="fancy-font btn text-xl font-bold btn-ghost">
+			<img src={logopic} alt="cat calendar creator" class="max-h-[40px]" />
+		</a>
 	</div>
 	<div class="navbar-center hidden md:flex">
 		<ul class="menu menu-horizontal gap-1 px-1">

@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { db } from '$lib/db.js';
-	import { useLiveQuery } from '$lib/utils/useLiveQuery.svelte.js';
+	import { liveQuery } from 'dexie';
 
 	let isDragging = $state(false);
 	let uploading = $state(false);
 	let errorMsg = $state('');
 
-	const uploads = useLiveQuery(() =>
-		db.favorites
-			.toArray()
-			.then((all) =>
-				all.filter((c) => c.isUploaded).sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
-			)
+	const uploads = $derived(
+		liveQuery(() =>
+			db.favorites
+				.toArray()
+				.then((all) =>
+					all.filter((c) => c.isUploaded).sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime())
+				)
+		)
 	);
 
 	async function handleFiles(files: FileList | null) {
@@ -110,11 +112,11 @@
 	{/if}
 
 	<!-- Uploaded photos -->
-	{#if uploads.value && uploads.value.length > 0}
+	{#if $uploads && $uploads.length > 0}
 		<div>
-			<h2 class="mb-3 text-lg font-semibold">Uploaded ({uploads.value.length})</h2>
+			<h2 class="mb-3 text-lg font-semibold">Uploaded ({$uploads.length})</h2>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-				{#each uploads.value as cat (cat.id)}
+				{#each $uploads as cat (cat.id)}
 					<div class="group card relative overflow-hidden bg-base-100 shadow">
 						<figure class="aspect-square overflow-hidden bg-base-200">
 							<img
