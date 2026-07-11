@@ -129,4 +129,7 @@
 			/>
 		</div>
 	{/each}
+	<!-- <div class="no-print p-3 text-center">
+		<button class="btn btn-sm btn-primary" onclick={print}>🖨 Print</button>
+	</div> -->
 {/if}

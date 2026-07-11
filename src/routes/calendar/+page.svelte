@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { db } from '$lib/db.js';
 	import { liveQuery } from 'dexie';
+	import { tick } from 'svelte';
 	import { getDefaultYear, MONTH_NAMES } from '$lib/utils/calendar.js';
 	import type { CalendarRecord, CalendarEvent, FavoriteCat } from '$lib/types.js';
 	import PhotoPickerModal from '$lib/components/PhotoPickerModal.svelte';
@@ -113,6 +114,15 @@
 
 	// ── Preview calendar shown below builder ──────────────────────────────────
 	let showPreview = $state(false);
+	let previewSection: HTMLElement | undefined = $state();
+
+	async function togglePreview() {
+		showPreview = !showPreview;
+		if (showPreview) {
+			await tick();
+			previewSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	}
 
 	const filledSlots = $derived(($activeCalendar?.photoIds ?? []).filter((id) => id != null).length);
 </script>
@@ -211,7 +221,7 @@
 		<div class="flex flex-wrap items-center justify-between gap-2">
 			<h2 class="text-xl font-bold">{cal.name} — {cal.year}</h2>
 			<div class="flex gap-2">
-				<button class="btn btn-ghost btn-sm" onclick={() => (showPreview = !showPreview)}>
+				<button class="btn btn-ghost btn-sm" onclick={togglePreview}>
 					{showPreview ? 'Hide preview' : 'Show preview'}
 				</button>
 				<a
@@ -237,7 +247,7 @@
 				{@const photo = slotPhotos[i]}
 				<div class="group relative">
 					<button
-						class="aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-dashed transition-colors
+						class="aspect-3/4 w-full overflow-hidden rounded-xl border-2 border-dashed transition-colors
 							{photo ? 'border-transparent' : 'border-base-300 bg-base-200 hover:border-primary/50'}"
 						onclick={() => openPhotoPicker(i)}
 						title="Pick photo for {monthName}"
@@ -329,10 +339,10 @@
 
 		<!-- Mini preview -->
 		{#if showPreview}
-			<div class="divider">Preview</div>
+			<div class="divider" bind:this={previewSection}>Preview</div>
 			<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
 				{#each MONTH_NAMES as _, i (i)}
-					<div class="aspect-[3/4]">
+					<div class="aspect-3/4">
 						<CalendarMonth
 							year={cal.year}
 							month={i}
@@ -345,6 +355,15 @@
 					</div>
 				{/each}
 			</div>
+			<p class="p-3 text-center">
+				<a
+					href="{resolve('/calendar/print')}?id={cal.id}"
+					class="btn btn-sm btn-primary"
+					target="_blank"
+				>
+					Preview & Print
+				</a>
+			</p>
 		{/if}
 	{/if}
 </div>

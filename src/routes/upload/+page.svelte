@@ -63,10 +63,9 @@
 	<h1 class="text-2xl font-bold">Upload Your Cats</h1>
 
 	<!-- Drop zone -->
-	<div
+	<section
 		class="cursor-pointer rounded-xl border-2 border-dashed p-12 text-center transition-colors
 			{isDragging ? 'border-primary bg-primary/5' : 'border-base-300 hover:border-primary/50'}"
-		role="region"
 		aria-label="File upload area"
 		ondragover={(e) => {
 			e.preventDefault();
@@ -105,7 +104,7 @@
 			</label>
 			<p class="text-xs text-base-content/40">Supports JPG, PNG, GIF, WebP</p>
 		</div>
-	</div>
+	</section>
 
 	{#if errorMsg}
 		<div class="alert alert-error"><span>{errorMsg}</span></div>
@@ -113,7 +112,7 @@
 
 	<!-- Uploaded photos -->
 	{#if $uploads && $uploads.length > 0}
-		<div>
+		<section>
 			<h2 class="mb-3 text-lg font-semibold">Uploaded ({$uploads.length})</h2>
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
 				{#each $uploads as cat (cat.id)}
@@ -136,6 +135,6 @@
 					</div>
 				{/each}
 			</div>
-		</div>
+		</section>
 	{/if}
 </div>
